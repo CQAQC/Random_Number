@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@/styles/variables.scss' as *;
 
 .pageContainer {
@@ -81,19 +82,24 @@
   border: 2rpx solid transparent;
   
   &.red {
-    background: linear-gradient(135deg, lighten($color-red-ball, 10%) 0%, $color-red-ball 100%);
+    background: linear-gradient(135deg, color.adjust($color-red-ball, $lightness: 10%) 0%, $color-red-ball 100%);
     color: $color-text-white;
   }
   
   &.blue {
-    background: linear-gradient(135deg, lighten($color-blue-ball, 10%) 0%, $color-blue-ball 100%);
+    background: linear-gradient(135deg, color.adjust($color-blue-ball, $lightness: 10%) 0%, $color-blue-ball 100%);
     color: $color-text-white;
   }
   
   &.selected {
-    border-color: $color-primary;
-    transform: scale(1.1);
-    box-shadow: 0 4rpx 12rpx rgba($color-primary, 0.3);
+    border-width: 4rpx;
+    border-color: $color-success;
+    transform: scale(1.15);
+    box-shadow: 
+      0 0 0 4rpx rgba($color-success, 0.2),
+      0 0 20rpx rgba($color-success, 0.4),
+      0 8rpx 24rpx rgba($color-success, 0.3);
+    background: linear-gradient(135deg, color.adjust($color-success, $lightness: 10%) 0%, $color-success 100%) !important;
   }
   
   &:active {
@@ -135,7 +141,7 @@
 }
 
 .confirmButton {
-  background: linear-gradient(135deg, $color-success 0%, lighten($color-success, 10%) 100%);
+  background: linear-gradient(135deg, $color-success 0%, color.adjust($color-success, $lightness: 10%) 100%);
   color: $color-text-white;
   height: $button-height-lg;
   border-radius: $radius-button;
@@ -194,17 +200,33 @@
 .selectedItem {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: $spacing-md;
   background: $color-bg-page;
   border-radius: $radius-md;
   margin-bottom: $spacing-sm;
+  gap: $spacing-md;
+  
+  .serialNumber {
+    width: 48rpx;
+    height: 48rpx;
+    border-radius: $radius-sm;
+    background: $color-bg-hover;
+    color: $color-text-secondary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    flex-shrink: 0;
+    border: 2rpx solid $color-border;
+  }
   
   .numbers {
     display: flex;
     align-items: center;
     gap: $spacing-xs;
     flex-wrap: wrap;
+    flex: 1;
   }
   
   .num {
@@ -238,6 +260,7 @@
     align-items: center;
     justify-content: center;
     font-size: $font-size-xl;
+    flex-shrink: 0;
     
     &:active {
       opacity: 0.8;

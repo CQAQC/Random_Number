@@ -11,7 +11,7 @@ interface SelectedNumbers {
 
 const MODE_CONFIG = {
   modeA: {
-    name: '模式 A',
+    name: '非常6+1',
     redCount: 6,
     redMax: 33,
     blueCount: 1,
@@ -20,7 +20,7 @@ const MODE_CONFIG = {
     blueLabel: '后区'
   },
   modeB: {
-    name: '模式 B',
+    name: '幸运52',
     redCount: 5,
     redMax: 35,
     blueCount: 2,
@@ -64,6 +64,9 @@ const SelectedItem: React.FC<{
 }> = ({ index, numbers, onDelete }) => {
   return (
     <View className={styles.selectedItem}>
+      <View className={styles.serialNumber}>
+        <Text>{index + 1}</Text>
+      </View>
       <View className={styles.numbers}>
         {numbers.reds.map((num) => (
           <View key={`${index}-red-${num}`} className={`${styles.num} ${styles.red}`}>
@@ -160,7 +163,7 @@ const IndexPage: React.FC = () => {
             clearAll();
           }}
         >
-          <Text>模式 A</Text>
+          <Text>非常6+1</Text>
         </View>
         <View
           className={`${styles.modeItem} ${currentMode === 'modeB' ? styles.active : styles.inactive}`}
@@ -169,7 +172,7 @@ const IndexPage: React.FC = () => {
             clearAll();
           }}
         >
-          <Text>模式 B</Text>
+          <Text>幸运52</Text>
         </View>
       </View>
 
