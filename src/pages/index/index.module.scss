@@ -39,9 +39,9 @@
 
 .card {
   background: $color-bg-card;
-  margin: $spacing-md;
+  margin: $spacing-sm;
   border-radius: $radius-lg;
-  padding: $spacing-lg;
+  padding: $spacing-md;
   box-shadow: $shadow-card;
 }
 
@@ -66,17 +66,17 @@
 .numberGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: $spacing-sm;
+  gap: $spacing-xs;
 }
 
 .numberBall {
-  width: 80rpx;
-  height: 80rpx;
+  width: 64rpx;
+  height: 64rpx;
   border-radius: $radius-round;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: $font-size-md;
+  font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   transition: all $transition-fast;
   border: 2rpx solid transparent;
@@ -109,8 +109,8 @@
 
 .buttonArea {
   display: flex;
-  gap: $spacing-md;
-  margin-top: $spacing-lg;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
   
   .btn {
     flex: 1;
@@ -143,14 +143,14 @@
 .confirmButton {
   background: linear-gradient(135deg, $color-success 0%, color.adjust($color-success, $lightness: 10%) 100%);
   color: $color-text-white;
-  height: $button-height-lg;
+  height: $button-height-md;
   border-radius: $radius-button;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: $font-size-lg;
+  font-size: $font-size-md;
   font-weight: $font-weight-semibold;
-  margin: $spacing-md;
+  margin: $spacing-sm $spacing-md;
   box-shadow: 0 4rpx 16rpx rgba($color-success, 0.3);
   transition: all $transition-fast;
   
@@ -172,6 +172,7 @@
   border-radius: $radius-lg;
   padding: $spacing-lg;
   box-shadow: $shadow-card;
+  min-height: 400rpx;
 }
 
 .sectionHeader {
@@ -193,7 +194,7 @@
 }
 
 .selectedList {
-  max-height: 600rpx;
+  max-height: 1500rpx;
   overflow-y: auto;
 }
 

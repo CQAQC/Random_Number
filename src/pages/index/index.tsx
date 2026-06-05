@@ -131,7 +131,7 @@ const IndexPage: React.FC = () => {
     if (selectedReds.length !== config.redCount || selectedBlues.length !== config.blueCount) {
       return;
     }
-    if (savedNumbers.length >= 10) {
+    if (savedNumbers.length >= 15) {
       return;
     }
     const newSet = {
@@ -151,7 +151,7 @@ const IndexPage: React.FC = () => {
     setSavedNumbers([]);
   };
 
-  const canConfirm = selectedReds.length === config.redCount && selectedBlues.length === config.blueCount && savedNumbers.length < 10;
+  const canConfirm = selectedReds.length === config.redCount && selectedBlues.length === config.blueCount && savedNumbers.length < 15;
 
   return (
     <View className={styles.pageContainer}>
@@ -231,7 +231,7 @@ const IndexPage: React.FC = () => {
       <View className={`${styles.confirmButton} ${canConfirm ? '' : styles.disabled}`} onClick={confirmSelection}>
         <Text>确认选择</Text>
       </View>
-      <Text className={styles.infoText}>已选列表最多保存 10 组号码</Text>
+      <Text className={styles.infoText}>已选列表最多保存 15 组号码</Text>
 
       <View className={styles.selectedSection}>
         <View className={styles.sectionHeader}>
