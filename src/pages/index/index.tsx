@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text } from '@tarojs/components';
+import { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 
 type ModeType = 'modeA' | 'modeB';
@@ -17,7 +18,8 @@ const MODE_CONFIG = {
     blueCount: 1,
     blueMax: 16,
     redLabel: '前区',
-    blueLabel: '后区'
+    blueLabel: '后区',
+    mode: 'modeA'
   },
   modeB: {
     name: '幸运52',
@@ -26,7 +28,8 @@ const MODE_CONFIG = {
     blueCount: 2,
     blueMax: 12,
     redLabel: '前区',
-    blueLabel: '后区'
+    blueLabel: '后区',
+    mode: 'modeB'
   }
 };
 
@@ -41,41 +44,25 @@ const generateRandomNumbers = (count: number, max: number): number[] => {
   return numbers.sort((a, b) => a - b);
 };
 
-const NumberBall: React.FC<{
-  number: number;
-  isSelected: boolean;
-  color: 'red' | 'blue';
-  onClick: () => void;
-}> = ({ number, isSelected, color, onClick }) => {
-  return (
-    <View
-      className={`${styles.numberBall} ${styles[color]} ${isSelected ? styles.selected : ''}`}
-      onClick={onClick}
-    >
-      <Text>{number.toString().padStart(2, '0')}</Text>
-    </View>
-  );
-};
-
 const SelectedItem: React.FC<{
   index: number;
-  numbers: SelectedNumbers;
+  item: SelectedNumbers;
   onDelete: () => void;
-}> = ({ index, numbers, onDelete }) => {
+}> = ({ index, item, onDelete }) => {
   return (
-    <View className={styles.selectedItem}>
-      <View className={styles.serialNumber}>
+    <View className={styles.numberItem}>
+      <View className={styles.itemIndex}>
         <Text>{index + 1}</Text>
       </View>
-      <View className={styles.numbers}>
-        {numbers.reds.map((num) => (
-          <View key={`${index}-red-${num}`} className={`${styles.num} ${styles.red}`}>
-            <Text>{num.toString().padStart(2, '0')}</Text>
+      <View className={styles.balls}>
+        {item.reds.map((num) => (
+          <View key={`red-${num}`} className={`${styles.ball} ${styles.redBall}`}>
+            <Text className={styles.ballText}>{num.toString().padStart(2, '0')}</Text>
           </View>
         ))}
-        {numbers.blues.map((num) => (
-          <View key={`${index}-blue-${num}`} className={`${styles.num} ${styles.blue}`}>
-            <Text>{num.toString().padStart(2, '0')}</Text>
+        {item.blues.map((num) => (
+          <View key={`blue-${num}`} className={`${styles.ball} ${styles.blueBall}`}>
+            <Text className={styles.ballText}>{num.toString().padStart(2, '0')}</Text>
           </View>
         ))}
       </View>
@@ -90,9 +77,25 @@ const IndexPage: React.FC = () => {
   const [currentMode, setCurrentMode] = useState<ModeType>('modeA');
   const [selectedReds, setSelectedReds] = useState<number[]>([]);
   const [selectedBlues, setSelectedBlues] = useState<number[]>([]);
-  const [savedNumbers, setSavedNumbers] = useState<SelectedNumbers[]>([]);
+  const [savedModeA, setSavedModeA] = useState<SelectedNumbers[]>([]);
+  const [savedModeB, setSavedModeB] = useState<SelectedNumbers[]>([]);
 
   const config = MODE_CONFIG[currentMode];
+
+  useDidShow(() => {
+    try {
+      const modeA = wx.getStorageSync('savedModeA');
+      const modeB = wx.getStorageSync('savedModeB');
+      if (modeA) setSavedModeA(modeA);
+      if (modeB) setSavedModeB(modeB);
+    } catch (e) {
+      console.error('Failed to load saved numbers:', e);
+    }
+  });
+
+  const getCurrentSavedNumbers = () => {
+    return currentMode === 'modeA' ? savedModeA : savedModeB;
+  };
 
   const handleRedClick = (num: number) => {
     if (selectedReds.includes(num)) {
@@ -122,8 +125,11 @@ const IndexPage: React.FC = () => {
     setSelectedBlues(randomBlues);
   };
 
-  const clearAll = () => {
+  const clearReds = () => {
     setSelectedReds([]);
+  };
+
+  const clearBlues = () => {
     setSelectedBlues([]);
   };
 
@@ -131,131 +137,242 @@ const IndexPage: React.FC = () => {
     if (selectedReds.length !== config.redCount || selectedBlues.length !== config.blueCount) {
       return;
     }
-    if (savedNumbers.length >= 15) {
+    if (getCurrentSavedNumbers().length >= 15) {
+      wx.showToast({ title: '最多保存15组', icon: 'none' });
       return;
     }
     const newSet = {
       reds: [...selectedReds],
       blues: [...selectedBlues]
     };
-    setSavedNumbers([...savedNumbers, newSet]);
-    clearAll();
+    
+    if (currentMode === 'modeA') {
+      const newList = [...savedModeA, newSet];
+      setSavedModeA(newList);
+      try {
+        wx.setStorageSync('savedModeA', newList);
+      } catch (e) {
+        console.error('Failed to save:', e);
+      }
+    } else {
+      const newList = [...savedModeB, newSet];
+      setSavedModeB(newList);
+      try {
+        wx.setStorageSync('savedModeB', newList);
+      } catch (e) {
+        console.error('Failed to save:', e);
+      }
+    }
+    
+    setSelectedReds([]);
+    setSelectedBlues([]);
+    wx.showToast({ title: '保存成功', icon: 'success' });
   };
 
-  const deleteSaved = (index: number) => {
-    const newList = savedNumbers.filter((_, i) => i !== index);
-    setSavedNumbers(newList);
+  const handleModeChange = (mode: ModeType) => {
+    if (mode !== currentMode) {
+      setCurrentMode(mode);
+      setSelectedReds([]);
+      setSelectedBlues([]);
+    }
   };
 
-  const clearSaved = () => {
-    setSavedNumbers([]);
+  const handleDeleteModeA = (index: number) => {
+    const newList = savedModeA.filter((_, i) => i !== index);
+    setSavedModeA(newList);
+    try {
+      wx.setStorageSync('savedModeA', newList);
+    } catch (e) {
+      console.error('Failed to save:', e);
+    }
   };
 
-  const canConfirm = selectedReds.length === config.redCount && selectedBlues.length === config.blueCount && savedNumbers.length < 15;
+  const handleDeleteModeB = (index: number) => {
+    const newList = savedModeB.filter((_, i) => i !== index);
+    setSavedModeB(newList);
+    try {
+      wx.setStorageSync('savedModeB', newList);
+    } catch (e) {
+      console.error('Failed to save:', e);
+    }
+  };
+
+  const handleClearModeA = () => {
+    setSavedModeA([]);
+    try {
+      wx.removeStorageSync('savedModeA');
+    } catch (e) {
+      console.error('Failed to clear:', e);
+    }
+  };
+
+  const handleClearModeB = () => {
+    setSavedModeB([]);
+    try {
+      wx.removeStorageSync('savedModeB');
+    } catch (e) {
+      console.error('Failed to clear:', e);
+    }
+  };
+
+  const canConfirm = selectedReds.length === config.redCount && selectedBlues.length === config.blueCount;
+  const totalCount = savedModeA.length + savedModeB.length;
+
+  const renderNumberSelect = (mode: ModeType) => {
+    const cfg = MODE_CONFIG[mode];
+    const reds = mode === 'modeA' && currentMode === 'modeA' ? selectedReds : (mode === 'modeB' && currentMode === 'modeB' ? selectedReds : []);
+    const blues = mode === 'modeA' && currentMode === 'modeA' ? selectedBlues : (mode === 'modeB' && currentMode === 'modeB' ? selectedBlues : []);
+    const savedList = mode === 'modeA' ? savedModeA : savedModeB;
+    const onDelete = mode === 'modeA' ? handleDeleteModeA : handleDeleteModeB;
+    const onClear = mode === 'modeA' ? handleClearModeA : handleClearModeB;
+
+    return (
+      <View className={styles.modeSwiperItem}>
+        {/* 前区选择 */}
+        <View className={styles.fullSection}>
+          <View className={styles.sectionHeader}>
+            <View className={styles.sectionTitle}>
+              <View className={styles.redDot}></View>
+              <Text className={styles.titleText}>{cfg.redLabel}</Text>
+            </View>
+            <Text className={styles.progress}>{reds.length} / {cfg.redCount}</Text>
+          </View>
+          
+          <View className={styles.numberGrid}>
+            {Array.from({ length: cfg.redMax }, (_, i) => i + 1).map((num) => (
+              <View
+                key={num}
+                className={`${styles.numberBall} ${reds.includes(num) ? styles.selected : ''}`}
+                onClick={() => mode === currentMode && handleRedClick(num)}
+              >
+                <Text>{num.toString().padStart(2, '0')}</Text>
+              </View>
+            ))}
+          </View>
+          
+          <View className={styles.buttonRow}>
+            <View 
+              className={`${styles.actionBtn} ${styles.primary}`} 
+              onClick={() => mode === currentMode && randomSelectReds()}
+            >
+              <Text>随机选择</Text>
+            </View>
+            <View 
+              className={`${styles.actionBtn} ${styles.secondary}`} 
+              onClick={() => mode === currentMode && clearReds()}
+            >
+              <Text>清空</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 后区选择 */}
+        <View className={styles.fullSection}>
+          <View className={styles.sectionHeader}>
+            <View className={styles.sectionTitle}>
+              <View className={styles.blueDot}></View>
+              <Text className={styles.titleText}>{cfg.blueLabel}</Text>
+            </View>
+            <Text className={styles.progress}>{blues.length} / {cfg.blueCount}</Text>
+          </View>
+          
+          <View className={styles.numberGrid}>
+            {Array.from({ length: cfg.blueMax }, (_, i) => i + 1).map((num) => (
+              <View
+                key={num}
+                className={`${styles.numberBall} ${styles.blue} ${blues.includes(num) ? styles.selected : ''}`}
+                onClick={() => mode === currentMode && handleBlueClick(num)}
+              >
+                <Text>{num.toString().padStart(2, '0')}</Text>
+              </View>
+            ))}
+          </View>
+          
+          <View className={styles.buttonRow}>
+            <View 
+              className={`${styles.actionBtn} ${styles.primary}`} 
+              onClick={() => mode === currentMode && randomSelectBlues()}
+            >
+              <Text>随机选择</Text>
+            </View>
+            <View 
+              className={`${styles.actionBtn} ${styles.secondary}`} 
+              onClick={() => mode === currentMode && clearBlues()}
+            >
+              <Text>清空</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 已选号码区域 */}
+        <View className={styles.savedSection}>
+          <View className={styles.sectionHeader}>
+            <View className={styles.sectionTitle}>
+              <View className={mode === 'modeA' ? styles.redDot : styles.blueDot}></View>
+              <Text className={styles.titleText}>已选号码</Text>
+            </View>
+            <Text className={styles.progress}>{savedList.length} / 15</Text>
+          </View>
+          
+          {savedList.length === 0 ? (
+            <View className={styles.emptyState}>
+              <Text className={styles.emptyText}>暂无已选号码</Text>
+            </View>
+          ) : (
+            <>
+              <View className={styles.numberList}>
+                {savedList.map((item, index) => (
+                  <SelectedItem
+                    key={index}
+                    index={index}
+                    item={item}
+                    onDelete={() => onDelete(index)}
+                  />
+                ))}
+              </View>
+              <View className={styles.clearBtn} onClick={onClear}>
+                <Text className={styles.clearText}>清空全部</Text>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View className={styles.pageContainer}>
+      {/* 玩法选择 */}
       <View className={styles.modeSelector}>
         <View
-          className={`${styles.modeItem} ${currentMode === 'modeA' ? styles.active : styles.inactive}`}
-          onClick={() => {
-            setCurrentMode('modeA');
-            clearAll();
-          }}
+          className={`${styles.modeItem} ${currentMode === 'modeA' ? styles.active : ''}`}
+          onClick={() => handleModeChange('modeA')}
         >
           <Text>非常6+1</Text>
+          <Text className={styles.modeCount}>{savedModeA.length} 组</Text>
         </View>
         <View
-          className={`${styles.modeItem} ${currentMode === 'modeB' ? styles.active : styles.inactive}`}
-          onClick={() => {
-            setCurrentMode('modeB');
-            clearAll();
-          }}
+          className={`${styles.modeItem} ${currentMode === 'modeB' ? styles.active : ''}`}
+          onClick={() => handleModeChange('modeB')}
         >
           <Text>幸运52</Text>
+          <Text className={styles.modeCount}>{savedModeB.length} 组</Text>
         </View>
       </View>
 
-      <View className={styles.card}>
-        <View className={styles.sectionTitle}>
-          <Text className={styles.title}>{config.redLabel}</Text>
-          <Text className={styles.count}>{selectedReds.length} / {config.redCount}</Text>
-        </View>
-        <View className={styles.numberGrid}>
-          {Array.from({ length: config.redMax }, (_, i) => i + 1).map((num) => (
-            <NumberBall
-              key={num}
-              number={num}
-              isSelected={selectedReds.includes(num)}
-              color="red"
-              onClick={() => handleRedClick(num)}
-            />
-          ))}
-        </View>
-        <View className={styles.buttonArea}>
-          <View className={`${styles.btn} ${styles.primary}`} onClick={randomSelectReds}>
-            <Text>随机选择</Text>
-          </View>
-          <View className={`${styles.btn} ${styles.secondary}`} onClick={() => setSelectedReds([])}>
-            <Text>清空</Text>
-          </View>
-        </View>
+      {/* 内容区域 */}
+      <View className={styles.contentArea}>
+        {renderNumberSelect(currentMode)}
       </View>
 
-      <View className={styles.card}>
-        <View className={styles.sectionTitle}>
-          <Text className={styles.title}>{config.blueLabel}</Text>
-          <Text className={styles.count}>{selectedBlues.length} / {config.blueCount}</Text>
+      {/* 底部操作区 */}
+      <View className={styles.bottomBar}>
+        <View 
+          className={`${styles.confirmBtn} ${canConfirm ? '' : styles.disabled}`}
+          onClick={confirmSelection}
+        >
+          <Text>保存选号</Text>
         </View>
-        <View className={styles.numberGrid}>
-          {Array.from({ length: config.blueMax }, (_, i) => i + 1).map((num) => (
-            <NumberBall
-              key={num}
-              number={num}
-              isSelected={selectedBlues.includes(num)}
-              color="blue"
-              onClick={() => handleBlueClick(num)}
-            />
-          ))}
-        </View>
-        <View className={styles.buttonArea}>
-          <View className={`${styles.btn} ${styles.primary}`} onClick={randomSelectBlues}>
-            <Text>随机选择</Text>
-          </View>
-          <View className={`${styles.btn} ${styles.secondary}`} onClick={() => setSelectedBlues([])}>
-            <Text>清空</Text>
-          </View>
-        </View>
-      </View>
-
-      <View className={`${styles.confirmButton} ${canConfirm ? '' : styles.disabled}`} onClick={confirmSelection}>
-        <Text>确认选择</Text>
-      </View>
-      <Text className={styles.infoText}>已选列表最多保存 15 组号码</Text>
-
-      <View className={styles.selectedSection}>
-        <View className={styles.sectionHeader}>
-          <Text className={styles.title}>已选号码</Text>
-          {savedNumbers.length > 0 && (
-            <Text className={styles.clearBtn} onClick={clearSaved}>清空全部</Text>
-          )}
-        </View>
-        {savedNumbers.length === 0 ? (
-          <View className={styles.emptyState}>
-            <Text>暂无已选号码</Text>
-          </View>
-        ) : (
-          <View className={styles.selectedList}>
-            {savedNumbers.map((item, index) => (
-              <SelectedItem
-                key={index}
-                index={index}
-                numbers={item}
-                onDelete={() => deleteSaved(index)}
-              />
-            ))}
-          </View>
-        )}
       </View>
     </View>
   );

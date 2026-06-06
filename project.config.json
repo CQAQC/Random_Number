@@ -1,8 +1,8 @@
 {
   "miniprogramRoot": "dist/",
-  "projectname": "taro_template",
-  "description": "taro_template",
-  "appid": "touristappid",
+  "projectname": "random_number",
+  "description": "random_number",
+  "appid": "wx319e4f453057485a",
   "setting": {
     "urlCheck": true,
     "es6": false,
