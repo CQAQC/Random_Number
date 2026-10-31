@@ -1,0 +1,68 @@
+<sjs module="xs" src="./utils.sjs" />
+<template name="taro_tmpl">
+  <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{root.cn}}" tt:key="sid" />
+</template>
+
+<template name="tmpl_0_0">
+  <view hover-class="{{i.p1||'none'}}" hover-stop-propagation="{{xs.b(i.p4,!1)}}" hover-start-time="{{xs.b(i.p2,50)}}" hover-stay-time="{{xs.b(i.p3,400)}}" bindtouchstart="eh" bindtouchend="eh" bindtouchcancel="eh" bindlongpress="eh" animation="{{i.p0}}" bindanimationstart="eh" bindanimationiteration="eh" bindanimationend="eh" bindtransitionend="eh" style="{{i.st}}" class="{{i.cl}}" bindtap="eh" catchtouchmove="eh"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </view>
+</template>
+
+<template name="tmpl_0_6">
+  <view hover-class="{{i.p1||'none'}}" hover-stop-propagation="{{xs.b(i.p4,!1)}}" hover-start-time="{{xs.b(i.p2,50)}}" hover-stay-time="{{xs.b(i.p3,400)}}" animation="{{i.p0}}" style="{{i.st}}" class="{{i.cl}}"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </view>
+</template>
+
+<template name="tmpl_0_3">
+  <view style="{{i.st}}" class="{{i.cl}}"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </view>
+</template>
+
+<template name="tmpl_0_1">
+  <view style="{{i.st}}" class="{{i.cl}}" bindtap="eh"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </view>
+</template>
+
+<template name="tmpl_0_8">
+  <view hover-class="{{i.p1||'none'}}" hover-stop-propagation="{{xs.b(i.p4,!1)}}" hover-start-time="{{xs.b(i.p2,50)}}" hover-stay-time="{{xs.b(i.p3,400)}}" bindtouchstart="eh" bindtouchmove="eh" bindtouchend="eh" bindtouchcancel="eh" bindlongpress="eh" animation="{{i.p0}}" bindanimationstart="eh" bindanimationiteration="eh" bindanimationend="eh" bindtransitionend="eh" style="{{i.st}}" class="{{i.cl}}" bindtap="eh"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </view>
+</template>
+
+<template name="tmpl_0_5">
+  <text selectable="{{xs.b(i.p1,!1)}}" space="{{i.p2}}" decode="{{xs.b(i.p0,!1)}}" style="{{i.st}}" class="{{i.cl}}"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </text>
+</template>
+
+<template name="tmpl_0_7">
+  <text selectable="{{xs.b(i.p1,!1)}}" space="{{i.p2}}" decode="{{xs.b(i.p0,!1)}}" bindtouchstart="eh" bindtouchmove="eh" bindtouchend="eh" bindtouchcancel="eh" bindlongpress="eh" style="{{i.st}}" class="{{i.cl}}" bindtap="eh"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </text>
+</template>
+
+<template name="tmpl_0_45">
+  <scroll-view scroll-x="{{xs.b(i.p14,!1)}}" scroll-y="{{xs.b(i.p15,!1)}}" upper-threshold="{{xs.b(i.p16,50)}}" lower-threshold="{{xs.b(i.p4,50)}}" scroll-top="{{i.p12}}" scroll-left="{{i.p11}}" scroll-into-view="{{i.p10}}" scroll-with-animation="{{xs.b(i.p13,!1)}}" enable-back-to-top="{{xs.b(i.p2,!1)}}" bindscrolltoupper="eh" bindscrolltolower="eh" bindscroll="eh" bindtouchstart="eh" bindtouchmove="eh" bindtouchend="eh" bindtouchcancel="eh" bindlongpress="eh" animation="{{i.p0}}" bindanimationstart="eh" bindanimationiteration="eh" bindanimationend="eh" bindtransitionend="eh" enhanced="{{xs.b(i.p3,!1)}}" bounces="{{xs.b(i.p1,!0)}}" refresher-enabled="{{xs.b(i.p7,!1)}}" refresher-threshold="{{xs.b(i.p8,55)}}" refresher-default-style="{{i.p6||'black'}}" refresher-background="{{i.p5||'#FFF'}}" refresher-triggered="{{xs.b(i.p9,!1)}}" bindrefresherpulling="eh" bindrefresherrefresh="eh" bindrefresherrestore="eh" bindrefresherabort="eh" style="{{i.st}}" class="{{i.cl}}" bindtap="eh"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </scroll-view>
+</template>
+
+<template name="tmpl_0_4">
+  <image src="{{i.p2}}" mode="{{i.p1||'scaleToFill'}}" lazy-load="{{xs.b(i.p0,!1)}}" style="{{i.st}}" class="{{i.cl}}"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </image>
+</template>
+
+<template name="tmpl_0_2">
+  <image src="{{i.p2}}" mode="{{i.p1||'scaleToFill'}}" lazy-load="{{xs.b(i.p0,!1)}}" binderror="eh" bindload="eh" bindtouchstart="eh" bindtouchmove="eh" bindtouchend="eh" bindtouchcancel="eh" bindlongpress="eh" style="{{i.st}}" class="{{i.cl}}" bindtap="eh"  id="{{i.uid||i.sid}}" data-sid="{{i.sid}}">
+    <template is="{{xs.a(0, item.nn)}}" data="{{i:item}}" tt:for="{{i.cn}}" tt:key="sid" />
+  </image>
+</template>
+
+<template name="tmpl_0_9">
+  <block>{{i.v}}</block>
+</template>
