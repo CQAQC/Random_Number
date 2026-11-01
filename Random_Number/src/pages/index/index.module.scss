@@ -153,6 +153,12 @@
   margin-top: $spacing-md;
 }
 
+.actionRow {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+}
+
 .actionBtn {
   flex: 1;
   padding: $spacing-md 0;
@@ -173,6 +179,11 @@
   &.secondary {
     background: $color-bg-hover;
     color: $color-text-secondary;
+  }
+
+  &.danger {
+    background: rgba($color-error, 0.12);
+    color: $color-error;
   }
   
   &:active {

@@ -44,6 +44,49 @@ const showToast = (title: string, icon: 'success' | 'none' = 'none') => {
   }
 };
 
+const copyToClipboard = (text: string) => {
+  if (isH5) {
+    const fallback = () => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch {
+        /* ignore */
+      }
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(fallback);
+    } else {
+      fallback();
+    }
+  } else {
+    wx.setClipboardData({
+      data: text,
+      success: () => showToast('复制成功', 'success'),
+      fail: () => showToast('复制失败')
+    });
+  }
+};
+
+const CIRCLED_NUMS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭', '⑮'];
+
+const formatSavedList = (list: SelectedNumbers[], title: string) =>
+  `【${title}】\n` +
+  list
+    .map((item, i) => {
+      const reds = item.reds.map((n) => n.toString().padStart(2, '0')).join(' ');
+      const blues = item.blues.map((n) => n.toString().padStart(2, '0')).join(' ');
+      const seq = CIRCLED_NUMS[i] ?? `${i + 1}.`;
+      return `${seq}  ${reds} + ${blues}`;
+    })
+    .join('\n');
+
 type ModeType = 'modeA' | 'modeB';
 
 interface SelectedNumbers {
@@ -61,6 +104,7 @@ const MODE_CONFIG = {
     blueMax: 16,
     redLabel: '前区',
     blueLabel: '后区',
+    copyTitle: '双色球',
     mode: 'modeA'
   },
   modeB: {
@@ -72,6 +116,7 @@ const MODE_CONFIG = {
     blueMax: 12,
     redLabel: '前区',
     blueLabel: '后区',
+    copyTitle: '大乐透',
     mode: 'modeB'
   }
 };
@@ -130,6 +175,7 @@ const ModeColumn: React.FC<{
   onDelete: (index: number) => void;
   onClear: () => void;
   onSave: () => void;
+  onCopy: () => void;
 }> = ({
   mode,
   selectedReds,
@@ -143,7 +189,8 @@ const ModeColumn: React.FC<{
   onClearBlues,
   onDelete,
   onClear,
-  onSave
+  onSave,
+  onCopy
 }) => {
   const cfg = MODE_CONFIG[mode];
   const canSave = selectedReds.length === cfg.redCount && selectedBlues.length === cfg.blueCount;
@@ -256,6 +303,9 @@ const ModeColumn: React.FC<{
                     />
                   ))}
                 </View>
+                <View className={useStyles.clearBtn} onClick={onCopy}>
+                  <Text className={useStyles.clearText}>一键复制</Text>
+                </View>
                 <View className={useStyles.clearBtn} onClick={onClear}>
                   <Text className={useStyles.clearText}>清空全部</Text>
                 </View>
@@ -275,6 +325,7 @@ const IndexPage: React.FC = () => {
   const [selectedBluesB, setSelectedBluesB] = useState<number[]>([]);
   const [savedModeA, setSavedModeA] = useState<SelectedNumbers[]>([]);
   const [savedModeB, setSavedModeB] = useState<SelectedNumbers[]>([]);
+  const [activeMode, setActiveMode] = useState<ModeType>('modeA');
 
   useDidShow(() => {
     try {
@@ -355,6 +406,16 @@ const IndexPage: React.FC = () => {
   const clearBluesA = () => setSelectedBluesA([]);
   const clearRedsB = () => setSelectedRedsB([]);
   const clearBluesB = () => setSelectedBluesB([]);
+
+  const copyModeA = () => {
+    if (savedModeA.length === 0) return;
+    copyToClipboard(formatSavedList(savedModeA, MODE_CONFIG.modeA.copyTitle));
+  };
+
+  const copyModeB = () => {
+    if (savedModeB.length === 0) return;
+    copyToClipboard(formatSavedList(savedModeB, MODE_CONFIG.modeB.copyTitle));
+  };
 
   const saveModeA = () => {
     const cfg = MODE_CONFIG.modeA;
@@ -440,6 +501,29 @@ const IndexPage: React.FC = () => {
     }
   };
 
+  const cfg = MODE_CONFIG[activeMode];
+  const isModeA = activeMode === 'modeA';
+  const curSelectedReds = isModeA ? selectedRedsA : selectedRedsB;
+  const curSelectedBlues = isModeA ? selectedBluesA : selectedBluesB;
+  const curSavedList = isModeA ? savedModeA : savedModeB;
+  const handleRedClick = isModeA ? handleRedClickA : handleRedClickB;
+  const handleBlueClick = isModeA ? handleBlueClickA : handleBlueClickB;
+  const randomSelectReds = isModeA ? randomSelectRedsA : randomSelectRedsB;
+  const randomSelectBlues = isModeA ? randomSelectBluesA : randomSelectBluesB;
+  const clearReds = isModeA ? clearRedsA : clearRedsB;
+  const clearBlues = isModeA ? clearBluesA : clearBluesB;
+  const handleDelete = isModeA ? handleDeleteModeA : handleDeleteModeB;
+  const handleClear = isModeA ? handleClearModeA : handleClearModeB;
+  const handleSave = isModeA ? saveModeA : saveModeB;
+
+  const handleCopyAll = () => {
+    if (curSavedList.length === 0) {
+      showToast('暂无可复制的号码');
+      return;
+    }
+    copyToClipboard(formatSavedList(curSavedList, cfg.copyTitle));
+  };
+
   if (isH5) {
     return (
       <View className={useStyles.pageContainer}>
@@ -463,6 +547,7 @@ const IndexPage: React.FC = () => {
             onDelete={handleDeleteModeA}
             onClear={handleClearModeA}
             onSave={saveModeA}
+            onCopy={copyModeA}
           />
 
           <ModeColumn
@@ -479,6 +564,7 @@ const IndexPage: React.FC = () => {
             onDelete={handleDeleteModeB}
             onClear={handleClearModeB}
             onSave={saveModeB}
+            onCopy={copyModeB}
           />
         </View>
 
@@ -492,11 +578,17 @@ const IndexPage: React.FC = () => {
   return (
     <View className={useStyles.pageContainer}>
       <View className={useStyles.modeSelector}>
-        <View className={`${useStyles.modeItem} ${useStyles.active}`}>
+        <View
+          className={`${useStyles.modeItem} ${activeMode === 'modeA' ? useStyles.active : ''}`}
+          onClick={() => setActiveMode('modeA')}
+        >
           <Text>非常6+1</Text>
           <Text className={useStyles.modeCount}>{savedModeA.length} 组</Text>
         </View>
-        <View className={useStyles.modeItem}>
+        <View
+          className={`${useStyles.modeItem} ${activeMode === 'modeB' ? useStyles.active : ''}`}
+          onClick={() => setActiveMode('modeB')}
+        >
           <Text>幸运52</Text>
           <Text className={useStyles.modeCount}>{savedModeB.length} 组</Text>
         </View>
@@ -507,26 +599,26 @@ const IndexPage: React.FC = () => {
           <View className={useStyles.sectionHeader}>
             <View className={useStyles.sectionTitle}>
               <View className={useStyles.redDot}></View>
-              <Text className={useStyles.titleText}>前区</Text>
+              <Text className={useStyles.titleText}>{cfg.redLabel}</Text>
             </View>
-            <Text className={useStyles.progress}>{selectedRedsA.length} / 6</Text>
+            <Text className={useStyles.progress}>{curSelectedReds.length} / {cfg.redCount}</Text>
           </View>
           <View className={useStyles.numberGrid}>
-            {Array.from({ length: 33 }, (_, i) => i + 1).map((num) => (
+            {Array.from({ length: cfg.redMax }, (_, i) => i + 1).map((num) => (
               <View
                 key={num}
-                className={`${useStyles.numberBall} ${selectedRedsA.includes(num) ? useStyles.selected : ''}`}
-                onClick={() => handleRedClickA(num)}
+                className={`${useStyles.numberBall} ${curSelectedReds.includes(num) ? useStyles.selected : ''}`}
+                onClick={() => handleRedClick(num)}
               >
                 <Text>{num.toString().padStart(2, '0')}</Text>
               </View>
             ))}
           </View>
           <View className={useStyles.buttonRow}>
-            <View className={`${useStyles.actionBtn} ${useStyles.primary}`} onClick={randomSelectRedsA}>
+            <View className={`${useStyles.actionBtn} ${useStyles.primary}`} onClick={randomSelectReds}>
               <Text>随机选择</Text>
             </View>
-            <View className={`${useStyles.actionBtn} ${useStyles.secondary}`} onClick={clearRedsA}>
+            <View className={`${useStyles.actionBtn} ${useStyles.secondary}`} onClick={clearReds}>
               <Text>清空</Text>
             </View>
           </View>
@@ -536,26 +628,26 @@ const IndexPage: React.FC = () => {
           <View className={useStyles.sectionHeader}>
             <View className={useStyles.sectionTitle}>
               <View className={useStyles.blueDot}></View>
-              <Text className={useStyles.titleText}>后区</Text>
+              <Text className={useStyles.titleText}>{cfg.blueLabel}</Text>
             </View>
-            <Text className={useStyles.progress}>{selectedBluesA.length} / 1</Text>
+            <Text className={useStyles.progress}>{curSelectedBlues.length} / {cfg.blueCount}</Text>
           </View>
           <View className={useStyles.numberGrid}>
-            {Array.from({ length: 16 }, (_, i) => i + 1).map((num) => (
+            {Array.from({ length: cfg.blueMax }, (_, i) => i + 1).map((num) => (
               <View
                 key={num}
-                className={`${useStyles.numberBall} ${useStyles.blue} ${selectedBluesA.includes(num) ? useStyles.selected : ''}`}
-                onClick={() => handleBlueClickA(num)}
+                className={`${useStyles.numberBall} ${useStyles.blue} ${curSelectedBlues.includes(num) ? useStyles.selected : ''}`}
+                onClick={() => handleBlueClick(num)}
               >
                 <Text>{num.toString().padStart(2, '0')}</Text>
               </View>
             ))}
           </View>
           <View className={useStyles.buttonRow}>
-            <View className={`${useStyles.actionBtn} ${useStyles.primary}`} onClick={randomSelectBluesA}>
+            <View className={`${useStyles.actionBtn} ${useStyles.primary}`} onClick={randomSelectBlues}>
               <Text>随机选择</Text>
             </View>
-            <View className={`${useStyles.actionBtn} ${useStyles.secondary}`} onClick={clearBluesA}>
+            <View className={`${useStyles.actionBtn} ${useStyles.secondary}`} onClick={clearBlues}>
               <Text>清空</Text>
             </View>
           </View>
@@ -567,27 +659,32 @@ const IndexPage: React.FC = () => {
               <View className={useStyles.redDot}></View>
               <Text className={useStyles.titleText}>已选号码</Text>
             </View>
-            <Text className={useStyles.progress}>{savedModeA.length} / 15</Text>
+            <Text className={useStyles.progress}>{curSavedList.length} / 15</Text>
           </View>
 
-          {savedModeA.length === 0 ? (
+          {curSavedList.length === 0 ? (
             <View className={useStyles.emptyState}>
               <Text className={useStyles.emptyText}>暂无已选号码</Text>
             </View>
           ) : (
             <>
               <View className={useStyles.numberList}>
-                {savedModeA.map((item, index) => (
+                {curSavedList.map((item, index) => (
                   <SelectedItem
                     key={index}
                     index={index}
                     item={item}
-                    onDelete={() => handleDeleteModeA(index)}
+                    onDelete={() => handleDelete(index)}
                   />
                 ))}
               </View>
-              <View className={useStyles.clearBtn} onClick={handleClearModeA}>
-                <Text className={useStyles.clearText}>清空全部</Text>
+              <View className={useStyles.actionRow}>
+                <View className={`${useStyles.actionBtn} ${useStyles.primary}`} onClick={handleCopyAll}>
+                  <Text>一键复制</Text>
+                </View>
+                <View className={`${useStyles.actionBtn} ${useStyles.danger}`} onClick={handleClear}>
+                  <Text>清空全部</Text>
+                </View>
               </View>
             </>
           )}
@@ -595,7 +692,7 @@ const IndexPage: React.FC = () => {
       </View>
 
       <View className={useStyles.bottomBar}>
-        <View className={`${useStyles.confirmBtn}`} onClick={saveModeA}>
+        <View className={`${useStyles.confirmBtn}`} onClick={handleSave}>
           <Text>保存选号</Text>
         </View>
       </View>

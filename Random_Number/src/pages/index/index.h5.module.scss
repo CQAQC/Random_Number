@@ -39,8 +39,8 @@
 }
 
 .modeColumn {
-  flex: 1;
-  min-width: 800px;
+  flex: 1 1 0;
+  min-width: 0;
   background: white;
   border-radius: 28px;
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
