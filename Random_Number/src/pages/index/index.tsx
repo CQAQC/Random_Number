@@ -104,7 +104,7 @@ const MODE_CONFIG = {
     blueMax: 16,
     redLabel: '前区',
     blueLabel: '后区',
-    copyTitle: '双色球',
+    copyTitle: '非常6+1',
     mode: 'modeA'
   },
   modeB: {
@@ -116,7 +116,7 @@ const MODE_CONFIG = {
     blueMax: 12,
     redLabel: '前区',
     blueLabel: '后区',
-    copyTitle: '大乐透',
+    copyTitle: '幸运52',
     mode: 'modeB'
   }
 };
